@@ -19,12 +19,10 @@
      :id (+ column (* row 8))}))
 
 (defn find-seat [assignments]
-  (loop [ids (sort (map :id assignments))]
-    (let [[a b] ids
-          diff (- b a)]
-      (if (= 2 diff)
-        (inc a)
-        (recur (rest ids))))))
+  (loop [[a b :as ids] (sort (map :id assignments))]
+    (if (= 2 (- b a))
+      (inc a)
+      (recur (rest ids)))))
 
 (deftest parsing
   (is (= {:row 70 :column 7 :id 567} (parse-assignment "BFFFBBFRRR")))
