@@ -3,8 +3,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [clojure.spec.alpha :as s]
-            [clojure.walk :as walk]
-            [clojure.set :as set]))
+            [clojure.walk :as walk]))
 
 (def example-input
   "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
@@ -33,10 +32,10 @@ iyr:2011 ecl:brn hgt:59in")
   (->> (str/split s #"\n\n")
        (map parse-passport)))
 
-(def allowed-fields #{:byr :iyr :eyr :hgt :hcl :ecl :pid :cid})
+(def expected-fields #{:byr :iyr :eyr :hgt :hcl :ecl :pid :cid})
 
 (defn has-correct-fields? [passport]
-  (every? #(contains? passport %) (set/difference allowed-fields #{:cid})))
+  (every? #(contains? passport %) (disj expected-fields :cid)))
 
 (deftest part-1
   (is (= 2 (count (filter has-correct-fields? (parse-batch example-input)))))
@@ -63,8 +62,5 @@ iyr:2011 ecl:brn hgt:59in")
 (s/def ::passport
   (s/keys :req-un [::byr ::iyr ::eyr ::hgt ::hcl ::ecl ::pid]))
 
-(defn valid? [passport]
-  (s/valid? ::passport passport))
-
 (deftest part-2
-  (is (= 172 (count (filter valid? (parse-batch input))))))
+  (is (= 172 (count (filter #(s/valid? ::passport %) (parse-batch input))))))

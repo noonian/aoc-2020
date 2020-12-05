@@ -28,7 +28,6 @@
 
 (defn lookup [map [x y :as pos]]
   (let [x-max (count (first map))
-        y-max (count map)
         x (mod x x-max)]
     (get-in map [y x])))
 
