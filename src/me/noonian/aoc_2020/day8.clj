@@ -13,7 +13,7 @@
 
 (defmulti eval-op (fn [env {:keys [op]}] op))
 
-(defmethod eval-op "nop" [env {:keys [arg]}]
+(defmethod eval-op "nop" [env _]
   (update env :ip inc))
 
 (defmethod eval-op "acc" [env {:keys [arg]}]
@@ -34,18 +34,17 @@
         (recur (eval-op env op) (conj seen ip))
         env))))
 
-(defn swap-op [{:keys [op] :as instruction}]
-  (if (= op "nop")
-    (assoc instruction :op "jmp")
-    (assoc instruction :op "nop")))
+(def swaps
+  {"nop" "jmp"
+   "jmp" "nop"})
+
+(defn swap-op [instruction]
+  (update instruction :op swaps))
 
 (defn all-versions [program]
-  (let [ips (filter #(or (= "nop" (:op (get program %)))
-                         (= "jmp" (:op (get program %))))
-                    (range (count program)))]
-    (cons program
-          (for [ip ips]
-            (update program ip swap-op)))))
+  (->> (filter (comp (set (keys swaps)) :op program) (range (count program)))
+       (map #(update program % swap-op))
+       (cons program)))
 
 (defn fix [program]
   (->> (all-versions program)
