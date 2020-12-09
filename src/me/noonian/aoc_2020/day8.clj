@@ -42,7 +42,8 @@
   (update instruction :op swaps))
 
 (defn all-versions [program]
-  (->> (filter (comp (set (keys swaps)) :op program) (range (count program)))
+  (->> (filter (comp (set (keys swaps)) :op program)
+               (range (count program)))
        (map #(update program % swap-op))
        (cons program)))
 
